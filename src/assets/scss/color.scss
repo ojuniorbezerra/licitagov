@@ -1,0 +1,35 @@
+@import "theme/variables";
+@import "style";
+html {
+	&.color-1 {
+		$primary-color: #7366ff;
+		$secondary-color: #f73164;
+		@import "style";
+	}
+	&.color-2 {
+		$primary-color: #0288d1;
+		$secondary-color: #26c6da;
+		@import "style";
+	}
+	&.color-3 {
+		$primary-color: #d64dcf;
+		$secondary-color: #8e24aa;
+		@import "style";
+	}
+	&.color-4 {
+		$primary-color: #4c2fbf;
+		$secondary-color: #2e9de4;
+		@import "style";
+	}
+	&.color-5 {
+		$primary-color: #7c4dff;
+		$secondary-color: #7b1fa2;
+		@import "style";
+	}
+	&.color-6 {
+		$primary-color: #3949ab;
+		$secondary-color: #4fc3f7;
+
+		@import "style";
+	}
+}
