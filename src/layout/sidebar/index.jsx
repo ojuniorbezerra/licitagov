@@ -3,82 +3,50 @@ import { MENUITEMS } from './menu';
 import {Link} from 'react-router-dom'
 import { translate } from 'react-switch-lang';
 import { Grid } from 'react-feather';
+var _ = require('lodash/core');
 
 const Sidebar = (props) => {
 
     const [mainmenu, setMainMenu] = useState(MENUITEMS);
     const [sidebartoogle, setSidebartoogle] = useState(true)
 
-    useEffect(() => {
+
+  const setNavActiveByUrl = () => {
     const currentUrl = window.location.pathname;
-    mainmenu.filter(items => {
-        if (items.path === currentUrl)
-            setNavActive(items)
-        if (!items.children) return false
-        items.children.filter(subItems => {
-            if (subItems.path === currentUrl)
-                setNavActive(subItems)
-            if (!subItems.children) return false
-            subItems.children.filter(subSubItems => {
-                if (subSubItems.path === currentUrl){
-                    setNavActive(subSubItems)
-                    return true
-                }
-                else{
-                    return false
-                }
-            })
-            return subItems
-        })
-        return items
+    MENUITEMS.forEach(sub => {
+      sub.children.forEach(link => {
+        if (link.path === currentUrl) {
+          link.active = true
+          sub.active = true;
+        }
+        return
+      })
     })
+    setMainMenu({ mainmenu: MENUITEMS })
+  }
+  
+    useEffect(() => {
+      setNavActiveByUrl()
      // eslint-disable-next-line
     }, []);
-
-    const setNavActive = (item) => {
-      MENUITEMS.filter(menuItem => {
-          if (menuItem !== item)
-              menuItem.active = false
-          if (menuItem.children && menuItem.children.includes(item))
-              menuItem.active = true
-          if (menuItem.children) {
-              menuItem.children.filter(submenuItems => {
-                  if (submenuItems.children && submenuItems.children.includes(item)) {
-                      menuItem.active = true
-                      submenuItems.active = true
-                      return true
-                  }
-                  else{
-                      return false
-                  }
-              })
-          }
-          return menuItem
-      })
-      item.active = !item.active
-      setMainMenu({ mainmenu: MENUITEMS })
-  }
-    const toggletNavActive = (item) => {        
-        if (!item.active) {
-            MENUITEMS.forEach(a => {
-                if (MENUITEMS.includes(item))
-                    a.active = false
-                if (!a.children) return false
-                a.children.forEach(b => {
-                    if (a.children.includes(item)) {
-                        b.active = false
-                    }
-                    if (!b.children) return false
-                    b.children.forEach(c => {
-                        if (b.children.includes(item)) {
-                            c.active = false
-                        }
-                    })
-                })
-            });
+    
+    const toggletNavActive = (item) => {
+      MENUITEMS.forEach(sub => {
+        if(item.type === 'sub'){
+          sub.active = sub.title === item.title;
+        }else{
+          sub.active = !!_.find(sub.children, {title: item.title})
+          sub.children.forEach(link => {
+            if (link.title === item.title) {
+              link.active = true
+              sub.active = true;
+            }else{
+              link.active = false
+            }
+          })
         }
-        item.active = !item.active
-        setMainMenu({ mainmenu: MENUITEMS })
+      })
+      setMainMenu({ mainmenu: MENUITEMS })
     }
 
     const openCloseSidebar = (toggle) => {
@@ -123,6 +91,7 @@ const Sidebar = (props) => {
                     {
                     MENUITEMS.map((menuItem, i) => 
                     <li className="dropdown" key={i}>
+                      
                     {(menuItem.type === 'sub') ?
                       <a className={`nav-link menu-title  ${menuItem.active ? 'active' : ''}`} href="#javascript" onClick={() => toggletNavActive(menuItem)}>
                         <menuItem.icon/>
@@ -141,47 +110,11 @@ const Sidebar = (props) => {
                           style={menuItem.active ? { opacity: 1, transition: 'opacity 500ms ease-in' } : {display: "none"}}>
                           
                           {menuItem.children.map((childrenItem, index) => {
-                            
                             return(
                             <li key={index}>
-
-                              {(childrenItem.type === 'sub') ?
-                                    <a className={`${childrenItem.active ? 'active' : '' }` } href="#javascript" onClick={() => toggletNavActive(childrenItem)}>{props.t(childrenItem.title)}
-                                        <span className="sub-arrow">
-                                        <i className="fa fa-chevron-right"></i>
-                                        </span>
-                                        <div className="according-menu">
-                                            {childrenItem.active ?
-                                            <i className="fa fa-angle-down"></i>
-                                            : <i className="fa fa-angle-right"></i>
-                                            }
-                                        </div>
-                                    </a>
-                                :''}
-
                               {(childrenItem.type === 'link') ?
                                 <Link to={childrenItem.path} className={`${childrenItem.active ? 'active' : '' }` } onClick={() => toggletNavActive(childrenItem)}>{props.t(childrenItem.title)}</Link>
                                 :''}
-
-                              {(childrenItem.type === 'exteral_link') ?
-                                  <a href={childrenItem.path}  className={childrenItem.active ? 'active' : ''} >{props.t(childrenItem.title)}</a>
-                                  : ''}
-                                
-
-                              {childrenItem.children ?
-                                <ul className="nav-sub-childmenu submenu-content"
-                                    style={childrenItem.active ? { display: "block" } : {display: "none"}}   
-                                    >
-                                    {childrenItem.children.map((childrenSubItem, key) =>
-                                    <li key={key}>
-                                        {(childrenSubItem.type === 'link') ?
-                                        <Link to={childrenSubItem.path} className={`${childrenSubItem.active ? 'active' : '' }` } onClick={() => toggletNavActive(childrenSubItem)}>{props.t(childrenSubItem.title)}</Link>
-                                        : ''}
-                                    </li>
-                                    )}
-                                </ul>
-                              :""}
-
                               </li>
                               )
                             })}
